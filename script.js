@@ -45,44 +45,84 @@ const showForm = document.getElementById('showForm')
 const addBookDialog = document.getElementById('addBookDialog')
 const title = document.getElementById('addBookTitle')
 const author = document.getElementById('addBookAuthor')
+const read = document.getElementById('addBookRead')
+const checkbox = document.querySelector('input[type="checkbox"]')
 
-const myLibrary = [];
+let myLibrary = JSON.parse(localStorage.getItem('myLibrary')) || [];
 
-function Book(title, author) {
-    // the constructor...
-    this.title = title
-    this.author = author
+function Book(title, author, read) {
+  // the constructor...
+  this.title = title
+  this.author = author
+  this.read = read
 }
 
-function addBookToLibrary(title = '', author = '') {
-    const newBook = new Book(title, author)
-    const myLibrary = JSON.parse(localStorage.getItem('myLibrary')) || []
-    console.log(myLibrary)
-    // myLibrary.push(newBook)
+function addBookToLibrary(title = '', author = '', read = false) {
+  if (title !== '' && author !== '') {
+    const newBook = new Book(title, author, read)
+    console.log(newBook)
+    myLibrary.push(newBook)
     localStorage.setItem("myLibrary", JSON.stringify(myLibrary))
     getAllBooks()
+  }
+}
+
+function removeBookFromLibrary(index) {
+  const updatedLibrary = myLibrary.filter((item, i) => i !== Number(index))
+  myLibrary = [...updatedLibrary]
+  localStorage.setItem("myLibrary", JSON.stringify(updatedLibrary))
+  getAllBooks()
+}
+
+function updateBookRead(index, value) {
+  myLibrary[index].read = value
+  localStorage.setItem("myLibrary", JSON.stringify(myLibrary))
+  getAllBooks()
 }
 
 const getAllBooks = () => {
-    const tableBody = document.querySelector('table tbody')
+  const tableBody = document.querySelector('table tbody')
+  tableBody.innerHTML = ''
 
-    const myLibrary = JSON.parse(localStorage.getItem('myLibrary')) || []
-    myLibrary.map((book, index) => {
-        const tableRow = document.createElement('tr')
-        tableRow.setAttribute("data-index", index)
-        const title = document.createElement('td')
-        title.textContent = book.title
-        const author = document.createElement('td')
-        author.textContent = book.author
-        tableRow.appendChild(title)
-        tableRow.appendChild(author)
-        tableBody.appendChild(tableRow)
+  const myLibrary = JSON.parse(localStorage.getItem('myLibrary')) || [];
+  myLibrary.map((book, index) => {
+    const tableRow = document.createElement('tr')
+    tableRow.setAttribute("data-index", index)
+    const title = document.createElement('td')
+    title.textContent = book.title
+
+    const author = document.createElement('td')
+    author.textContent = book.author
+
+    const read = document.createElement('td')
+    const checkbox = document.createElement('input')
+    checkbox.setAttribute('type', 'checkbox')
+    if(book.read !== false) {
+      checkbox.checked = true
+    }
+    checkbox.addEventListener('change', (e) => {
+      updateBookRead(index, e.target.checked)
     })
+    read.appendChild(checkbox)
+
+    const removeButton = document.createElement('button')
+    removeButton.textContent = 'x'
+    removeButton.id = 'delete'
+    removeButton.setAttribute('data-index', index)
+
+    removeButton?.addEventListener('click', (e) => {
+      removeBookFromLibrary(e.target.getAttribute('data-index'))
+    })
+
+    tableRow.appendChild(title)
+    tableRow.appendChild(author)
+    tableRow.appendChild(read)
+    tableRow.appendChild(removeButton)
+    tableBody.appendChild(tableRow)
+  })
 }
 
 getAllBooks()
-
-
 
 showForm.addEventListener('click', () => {
   addBookDialog.show()
@@ -90,9 +130,8 @@ showForm.addEventListener('click', () => {
 
 submit.addEventListener('click', (e) => {
   e.preventDefault()
-  e.stopPropagation()
-  console.log(title.value, author.value)
-  addBookToLibrary(title.value, author.value)
+  const readValue = read.value === false ? false : true;
+  addBookToLibrary(title.value, author.value, readValue)
   addBookDialog.close()
   reset()
 })
@@ -100,6 +139,7 @@ submit.addEventListener('click', (e) => {
 function reset() {
   title.value = ''
   author.value = ''
+  read.value = false
 }
 
 
