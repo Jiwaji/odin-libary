@@ -2,7 +2,9 @@ const submit = document.getElementById('addBook')
 const showForm = document.getElementById('showForm')
 const addBookDialog = document.getElementById('addBookDialog')
 const title = document.getElementById('addBookTitle')
+const titleError = title.nextElementSibling
 const author = document.getElementById('addBookAuthor')
+const authorError = author.nextElementSibling
 const read = document.getElementById('addBookRead')
 const checkbox = document.querySelector('input[type="checkbox"]')
 
@@ -92,9 +94,24 @@ showForm.addEventListener('click', () => {
 
 submit.addEventListener('click', (e) => {
   e.preventDefault()
-  addBookToLibrary(title.value, author.value, read.checked)
-  addBookDialog.close()
-  reset()
+
+  if(!title.validity.valid) {
+    if(title.validity.valueMissing) {
+      titleError.textContent = "Please enter title"
+    }
+  }
+
+  if(!author.validity.valid) {
+    if(author.validity.valueMissing) {
+      authorError.textContent = "Please enter author name"
+    }
+  }
+
+  if(title.validity.valid && author.validity.valid) {
+    addBookToLibrary(title.value, author.value, read.checked)
+    addBookDialog.close()
+    reset()
+  }
 })
 
 function reset() {

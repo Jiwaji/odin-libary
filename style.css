@@ -1,0 +1,14 @@
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+form div:not(:last-of-type) {
+    display: flex;
+    flex-direction: column;
+}
+
+.error {
+    color: red;
+}
